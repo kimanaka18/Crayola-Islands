@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <title>CrayolaIslands</title>
+  </head>
+
+
+  <body>
+  <p> Welcome to Crayola Islands! Please enter your team name and password. </p>
+
+    <!-- Text fields for login. -->
+    <%= form_for(:session, url: '/login') do |f| %>
+      <label for="game_username">Username:</label>
+      <br>
+      <%= f.text_field :username %>
+      <br>
+      <label for="game_password">Password:</label>
+      <br>
+      <%= f.password_field :password %>
+      <br>
+      <br>
+      <%= f.submit "Log in", class: "btn btn-primary" %>
+    <% end %>
+   </body>
+</html>

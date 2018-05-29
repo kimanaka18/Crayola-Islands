@@ -1,0 +1,15 @@
+<html>
+    <%= form_for(:user, action: 'create') do |f| %>
+      <%= f.label :team %>
+      <%= f.select :team, [['Admin', 0], ['Red', 1], ['Blue', 2], ['Yellow', 3], ['Green', 4], ['Purple', 5], ['Orange', 6], 
+      ['Black', 7], ['White', 8]] %>
+      <br>
+      <%= f.label :username %>
+      <%= f.text_field :username %>
+      <br>
+      <%= f.label :password %>
+      <%= f.text_field :password %>
+      <br>
+      <%= f.submit "Go!", class: "btn btn-primary" %>
+    <% end %>
+</html>

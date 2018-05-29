@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="game.scss">
+    <title>CrayolaIslands</title>
+  </head>
+
+  <body>
+    <h1> Your team's current territory: </h1>
+
+    <!-- Map image. Always shown. -->
+    <div class="mapContainer">
+      <div class="mapBG">
+        <img src="/assets/plainmap.jpg" />
+      </div>
+
+      <div class="studentOverlay">
+        <!-- Show partially opaque colored squares depending on current view. -->
+        <div class="territoryOverlay">
+          <% counter = 0 %>
+          <% @territoryMap[:data].each_char do |each| %>
+            <!-- Display territory icons based on user's team value. -->
+            <% filename = 'territory' + @team.to_s %>
+            <% if @team == each.to_i %>
+              <div class="tileFound">
+                <%= image_tag(filename) %>
+              </div>
+            <% else %>
+              <div class="notFound">
+                <%= image_tag(filename) %>
+              </div>
+            <% end %>
+            <!-- increment counter. -->
+            <% counter += 1 %>
+  
+          <% end %>
+        </div>
+  
+        <div class="resourceOverlay">
+          <% counter = 0 %>
+          <% @resourceMap[:data].each_char do |each| %>
+            <!-- Display territory icons based on user's team value. -->
+            <% filename = 'resource' + each %>
+            <% if each.to_i > 0 && @territoryMap[:data][counter].to_i == @team %>
+              <div class="found">
+                <%= image_tag(filename) %>
+              </div>
+            <% else %>
+              <div class="notFound">
+                <%= image_tag(filename) %>
+              </div>
+            <% end %>
+            <!-- increment counter. -->
+            <% counter += 1 %>
+  
+          <% end %>
+        </div>
+  
+        <div class="personOverlay">
+          <% counter = 0 %>
+          <% @personMap[:data].each_char do |each| %>
+            <!-- Display territory icons based on user's team value. -->
+            <% filename = 'person' + each %>
+            <% if each.to_i > 0 && @territoryMap[:data][counter].to_i == @team %>
+              <div class="found">
+                <%= image_tag(filename) %>
+              </div>
+            <% else %>
+              <div class="notFound">
+                <%= image_tag(filename) %>
+              </div>
+            <% end %>
+            <!-- increment counter. -->
+            <% counter += 1 %>
+  
+          <% end %>
+          
+          <p>Stats:</p>
+          <table>
+            <tr>
+              <th style="text-align:center;padding:3px;">Team</th>
+              <% for i in 1..6 %>
+              <th style="text-align:center;padding:3px;"><img src= <%= "/assets/resource" +  i.to_s + ".png" %> ></th>
+              <% end %>
+            </tr>
+            <tr>
+              <% teams = ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange', 'Black', 'White'] %>  
+              <td style="text-align:center;padding:3px;">
+                <%= teams[@team - 1] %>
+              </td>
+              <!-- search map for resource & matching team -->
+              <% for j in 1..6 %>
+                <% counter = 0 %>
+                <% usedCounter = 0 %>
+                <% tile = 0 %>
+                <% @resourceMap[:data].each_char do |each| %>
+                  <% if j == each.to_i && @team == @territoryMap[:data][tile].to_i %>
+                    <% counter += 1 %>
+                    <% if 1 == @personMap[:data][tile].to_i %>
+                      <% usedCounter += 1 %>
+                    <% end %>
+                  <% end %>
+                <% tile += 1 %>
+              <% end %>
+              <td style="text-align:center;padding:3px;">
+                <%= counter.to_s + " (" + usedCounter.to_s + ")" %>
+              </td>
+              <% end %>
+            </tr>
+          </table>
+          
+        </div>
+      </div>
+
+    </div>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+<html>
+    <p>Randomize map, including starting locations, team territories, and resources?<br>
+    This will irreversably delete the old map!</p><br>
+    <%= form_for(:map, action: 'randomize') do |f| %>
+      <%= f.submit "Go!", class: "btn btn-primary" %>
+    <% end %>
+</html>

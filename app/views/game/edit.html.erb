@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <title>CrayolaIslands</title>
+  </head>
+
+  <body onload=<%="init(" + @selector.to_s + ")"%>>
+    <!-- Buttons for viewing adjustment. -->
+    
+    <p> Toggle: </p>
+    <button onclick="toggle('1')", id="button1"> Red </button>
+    <button onclick="toggle('2')", id="button2"> Blue </button>
+    <button onclick="toggle('3')", id="button3"> Yellow </button>
+    <button onclick="toggle('4')", id="button4"> Green </button>
+    <button onclick="toggle('5')", id="button5"> Purple </button>
+    <button onclick="toggle('6')", id="button6"> Orange </button>
+    <button onclick="toggle('7')", id="button7"> Black </button>
+    <button onclick="toggle('8')", id="button8"> White </button>
+    <button onclick="toggle('9')", id="button9"> All Resources </button>
+  
+    <br>
+    <!-- Map modification script -->
+    <p> Edit: </p>
+    
+    <%= form_for(:map, action: 'modify') do |f| %>
+      <p>
+      <%= f.select :action, [['Add', 0], ['Remove', 1], ['Add (Force)', 2]] %>
+      a 
+      <%= f.select :newVal, [['Red Territory', 0], ['Blue Territory', 1], ['Yellow Territory', 2], ['Green Territory', 3], ['Purple Territory', 4], 
+      ['Orange Territory', 5], ['Black Territory', 6], ['White Territory', 7], ['Livestock', 8], ['Forest', 9], ['Fish', 10], ['Mine', 11],
+      ['Oil', 12], ['Crops', 13], ['Capital', 14], ['Civilian', 15], ['Military', 16]] %>
+      at
+      <%= f.text_field :tileSelector, maxlength: 2, size:2, readonly: true, value:'00', id: "tileSelector" %>
+      <%= f.hidden_field :buttonSelector, value:'000000000', id: "buttonSelector" %>
+      </p>
+      <%= f.submit "Go!", class: "btn btn-primary" %>
+    <% end %>
+    <br>
+    
+    <!-- Flash messages. -->
+    <% flash.each do |key, value| %>
+      <div class="<%= flash_class(key) %>">
+            <%= value %>
+      </div>
+    <% end %>
+    
+    
+    
+    <div class="mapContainer">
+      <div class="mapBG">
+          <img src="/assets/plainmap.jpg">
+      </div>
+      
+      <!-- beginning of overlay system -->
+      <% for i in 1..8 %>
+        <div class="overlay", id=<%= "overlay" + i.to_s %>>
+          <!-- Show partially opaque colored squares depending on current view. -->
+          <div class="territoryOverlay">
+            <% counter = 0 %>
+            <% @territoryMap[:data].each_char do |each| %>
+              <% filename = 'territory' + each %>
+              <% if i == each.to_i %>
+                <div class="tileFound">
+                  <%= image_tag(filename) %>
+                </div>
+              <% else %>
+                <div class="notFound">
+                  <%= image_tag(filename) %>
+                </div>
+              <% end %>
+              <% counter += 1 %>
+            <% end %>
+          </div>
+    
+          <div class="resourceOverlay">
+            <% counter = 0 %>
+            <% @resourceMap[:data].each_char do |each| %>
+              <% filename = 'resource' + each %>
+              <% if each.to_i > 0 && @territoryMap[:data][counter].to_i == i %>
+                <div class="found">
+                  <%= image_tag(filename) %>
+                </div>
+              <% else %>
+                <div class="notFound">
+                  <%= image_tag(filename) %>
+                </div>
+              <% end %>
+              <% counter += 1 %>
+            <% end %>
+          </div>
+    
+          <div class="personOverlay">
+            <% counter = 0 %>
+            <% @personMap[:data].each_char do |each| %>
+              <% filename = 'person' + each %>
+              <% if each.to_i > 0 && @territoryMap[:data][counter].to_i == i %>
+                <div class="found">
+                  <%= image_tag(filename) %>
+                </div>
+              <% else %>
+                <div class="notFound">
+                  <%= image_tag(filename) %>
+                </div>
+              <% end %>
+              <% counter += 1 %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+      <!-- end of new overlay system -->
+      
+      <div class="allResourceOverlay", id="overlay9">
+          <% counter = 0 %>
+          <% @resourceMap[:data].each_char do |each| %>
+            <% filename = 'resource' + each %>
+            <% if each.to_i > 0 %>
+              <div class="found">
+                <%= image_tag(filename) %>
+              </div>
+            <% else %>
+              <div class="notFound">
+                <%= image_tag(filename) %>
+              </div>
+            <% end %>
+            <% counter += 1 %>
+          <% end %>
+      </div>
+      
+      <!-- clickable overlay for the map modification script -->
+      <div class="clickOverlay">
+        <% counter = 0 %>
+        <% @resourceMap[:data].each_char do |each| %>
+          <div class="found", id=<%= "tile" + counter.to_s %>>
+            <img src="/assets/territory0.png" onclick = "select(<%= counter.to_s %>)">
+            </div>
+          <% counter += 1 %>
+        <% end %>
+      </div>
+    </div>
+
+    <p>Stats:</p>
+    <table>
+      <tr>
+        <th style="text-align:center;padding:3px;">Team</th>
+        <% for i in 1..6 %>
+        <th style="text-align:center;padding:3px;"><img src= <%= "/assets/resource" +  i.to_s + ".png" %> ></th>
+        <% end %>
+      </tr>
+        
+      <% teams = ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange', 'Black', 'White'] %>  
+      <!-- for each team -->
+      <% for i in 1..8 %>
+          <tr>
+            <td style="text-align:center;padding:3px;">
+              <%= teams[i - 1] %>
+            </td>
+            <!-- search map for resource & matching team -->
+            <% for j in 1..6 %>
+              <% counter = 0 %>
+              <% usedCounter = 0 %>
+              <% tile = 0 %>
+              <% @resourceMap[:data].each_char do |each| %>
+                <% if j == each.to_i && i == @territoryMap[:data][tile].to_i %>
+                  <% counter += 1 %>
+                  <% if 1 == @personMap[:data][tile].to_i %>
+                    <% usedCounter += 1 %>
+                  <% end %>
+                <% end %>
+                <% tile += 1 %>
+              <% end %>
+              <td style="text-align:center;padding:3px;">
+                <div class="tableElement", id=<%= "element" + i.to_s + j.to_s %>>
+                  <%= counter.to_s + " (" + usedCounter.to_s + ")" %>
+                </div>
+              </td>
+            <% end %>
+          </tr>
+      <% end %>
+    </table>
+    
+    
+    <a href="/game/create">Create Login</a>
+    <br>
+    <a href="/game/randomize">Randomize Map</a>
+    <br>
+    <a href="/game/delete">Delete Account</a>
+          
+
+    <script>
+      function toggle(index){
+        var overlay = document.getElementById('overlay' + index);
+        if (overlay.style.visibility !== 'visible') {
+          overlay.style.visibility = 'visible';
+        } 
+        else {
+          overlay.style.visibility = 'hidden';
+        }
+        
+        var button = document.getElementById('button' + index);
+        if (button.style.backgroundColor !== 'rgb(88, 88, 88)') {
+          button.style.backgroundColor = 'rgb(88, 88, 88)';
+        } 
+        else {
+          button.style.backgroundColor = 'buttonface';
+        }
+        
+        if (index < 9){
+          var tableCell;
+          for (var i = 1; i < 7; i++){
+            tableCell = document.getElementById('element' + index + i);
+            if (tableCell.style.visibility !== 'visible') {
+              tableCell.style.visibility = 'visible';
+            } 
+            else {
+              tableCell.style.visibility = 'hidden';
+            }
+          }
+        }
+        
+        var newButtonSelector = document.getElementById("buttonSelector").value;
+        var temp = newButtonSelector;
+        if (newButtonSelector[index - 1] === "0"){
+          temp = newButtonSelector.substring(0, index - 1) + "1" + newButtonSelector.substring(index, 9);
+          console.log(temp);
+        }
+        else{
+          temp = newButtonSelector.substring(0, index - 1) + "0" + newButtonSelector.substring(index, 9);
+          console.log(temp);
+        }
+        document.getElementById("buttonSelector").value = temp;
+      }
+    </script>
+    
+    <script>
+      function select(index){
+        console.log("Tile " + index + " selected...");
+        for (var i = 0; i < 150; i++){
+          var tile = document.getElementById('tile' + i);
+          if (tile.style.opacity != "0"){
+            tile.style.opacity = "0";
+            console.log("Tile " + i + " hidden...");
+          }
+        }
+        var tile = document.getElementById('tile' + index);
+        console.log("Tile " + index + " unhidden...");
+        tile.style.opacity = "1";
+        var col = (index % 15).toString(16);
+        var row = Math.floor(index / 15).toString(16);
+        var newValue = row + col;
+        document.getElementById("tileSelector").value = newValue;
+      } 
+    </script>
+    
+    <script>
+      function init(value){
+        console.log("Starting...");
+        value = value.toString(2);
+        while (value.length < 9){
+          value = "0"+value;
+        }
+        console.log(value);
+        for (var i = 0; i < 9; i++){
+          if (value[i] === "1"){
+            toggle(i + 1);
+            console.log("Toggled " + (i + 1));
+          }
+        }
+      }
+      for (var i = 0; i < 150; i++){
+          var tile = document.getElementById('tile' + i);
+          tile.style.opacity = "0";
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+<html>
+  <p>
+    To delete an account, enter its username and password.
+    <br>
+    This action cannot be undone.
+  </p>
+    <%= form_for(:user, action: 'delete') do |f| %>
+      <br>
+      <%= f.label :username %>
+      <%= f.text_field :username %>
+      <br>
+      <%= f.label :password %>
+      <%= f.password_field :password %>
+      <br>
+      <%= f.submit "Delete Account", class: "btn btn-primary" %>
+    <% end %>
+</html>

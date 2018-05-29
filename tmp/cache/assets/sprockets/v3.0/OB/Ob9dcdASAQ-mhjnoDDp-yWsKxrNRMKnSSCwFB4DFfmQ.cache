@@ -1,0 +1,5 @@
+I"J(function() {
+  this["switch"] = function(index) {};
+
+}).call(this);
+:ET
